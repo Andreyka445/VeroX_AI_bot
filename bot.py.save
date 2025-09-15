@@ -1,0 +1,89 @@
+import os
+from telegram import Update
+from telegram.ext import Application, CommandHandler, MessageHandler, filters, ContextTypes
+
+# Попробуем разные варианты импорта
+try:
+    from deepseek_sdk import DeepSeek
+    print("Используется deepseek_sdk")
+except ImportError:
+    try:
+        from deepseek import DeepSeek
+        print("Используется deepseek")
+    except ImportError:
+        try:
+            import deepseek_api as DeepSeek
+            print("Используется deepseek_api")
+        except ImportError:
+            print("Не удалось найти ни один deepseek пакет")
+            exit(1)
+
+
+# --- конфиг ---
+# Вставьте свои токены сюда
+DEEPSEEK_API_KEY = "sk-b6900d53a5a0410c8e24339f5ff5b612"
+TELEGRAM_BOT_TOKEN = "8436574599:AAGFVLIE5JUiscqNhJByu5QG927DGll1zWw"
+
+# Инициализируем клиент DeepSeek
+client = DeepSeek(api_key=DEEPSEEK_API_KEY)
+
+# --- ОБРАБОТЧИКИ КОМАНД ТЕЛЕГРАМА ---
+async def start_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """Обрабатывает команду /start"""
+    welcome_text = """
+Привет! я ии бот от @Andreyka4_45, построенный на апи deepseek'а.
+    """
+    await update.message.reply_text(welcome_text)
+
+async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """Обрабатывает команду /help"""
+    help_text = """
+Я использую мощную модель DeepSeek для генерации ответов.
+Просто напиши мне в чат, и я отвечу. Никаких специальных команд не нужно!
+    """
+    await update.message.reply_text(help_text)
+
+async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """Обрабатывает все текстовые сообщения, не являющиеся командами."""
+    user_message = update.message.text
+
+    # Показываем статус "печатает..."
+    async with client.chat.create_messages_stream(
+        model="deepseek-chat",
+        messages=[{"role": "user", "content": user_message}]
+    ) as stream:
+        full_response = ""
+        await update.message.chat.send_action(action="typing")
+        async for chunk in stream:
+            if chunk.content:
+                full_response += chunk.content
+
+    # Отправляем собранный ответ пользователю
+    await update.message.reply_text(full_response)
+
+async def error_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """Логирует ошибки и выводит их в консоль."""
+    print(f"Update {update} caused error {context.error}")
+
+# --- ОСНОВНАЯ ЛОГИКА ЗАПУСКА БОТА ---
+def main():
+    print("Запуск бота...")
+    # Создаем Application и передаем в него токен
+    app = Application.builder().token(TELEGRAM_BOT_TOKEN).build()
+
+    # Добавляем обработчики команд
+    app.add_handler(CommandHandler("start", start_command))
+    app.add_handler(CommandHandler("help", help_command))
+
+    # Добавляем обработчик для обычных текстовых сообщений
+    app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_message))
+
+    # Добавляем обработчик ошибок
+    app.add_error_handler(error_handler)
+
+    # Запускаем бота на опрос серверов Telegram
+    print("Бот запущен и слушает сообщения...")
+    app.run_polling(poll_interval=3)
+
+if __name__ == "__main__":
+    main()
