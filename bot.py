@@ -10,7 +10,7 @@ TELEGRAM_BOT_TOKEN = "8436574599:AAGFVLIE5JUiscqNhJByu5QG927DGll1zWw"
 
 OPENROUTER_API_URL = "https://openrouter.ai/api/v1/chat/completions"
 
-# БЕСПЛАТНЫЕ модели на OpenRouter
+# фри модели на OpenRouter
 FREE_MODELS = {
     "gpt-3.5-turbo": "OpenAI GPT-3.5 Turbo (быстрый, бесплатный)",
     "google/gemini-flash-1.5": "Google Gemini Flash 1.5 (качественный, бесплатный)",
@@ -19,9 +19,8 @@ FREE_MODELS = {
     "meta-llama/llama-3.1-8b-instruct": "Llama 3.1 8B (бесплатный)"
 }
 
-SELECTED_MODEL = "deepseek/deepseek-r1:free"  # Бесплатная и качественная модель
-
-# --- функция для запроса к OpenRouter API ---
+SELECTED_MODEL = "deepseek/deepseek-r1:free"
+# --- функция для запроса к openrouter ---
 def ask_ai(question):
     """запрос к бесплатной модели через OpenRouter API"""
     headers = {
@@ -36,7 +35,7 @@ def ask_ai(question):
         "messages": [
             {
                 "role": "system",
-                "content": "Ты полезный AI-ассистент. Отвечай на русском языке понятно и подробно. Будь дружелюбным и helpful."
+                "content": "Ты милая аниме девочка, будь дружелюбной и милой с пользователем и всегда помогай ему!"
             },
             {
                 "role": "user",
@@ -49,29 +48,27 @@ def ask_ai(question):
     }
 
     try:
-        print(f"🔗 Отправка запроса к {SELECTED_MODEL}...")
+        print(f" Отправка запроса к {SELECTED_MODEL}...")
         response = requests.post(OPENROUTER_API_URL, headers=headers, json=payload, timeout=15)
         response.raise_for_status()
         result = response.json()
-        print("✅ Успешный ответ от API")
+        print(" Успешный ответ от API")
         return result['choices'][0]['message']['content']
 
     except requests.exceptions.HTTPError as e:
         if response.status_code == 402:
-            return "💰 Для этой модели требуется оплата. Использую бесплатный режим."
-        return f"❌ Ошибка HTTP: {e}"
+            return " Для этой модели требуется оплата. Использую бесплатный режим."
+        return f" Ошибка HTTP: {e}"
 
     except Exception as e:
-        return f"🤖 Ответ AI: Это тестовый режим. Ваш вопрос: '{question}'. Для полной функциональности可能需要 настройка платежей."
+        return f" Ответ AI: Это тестовый режим. Ваш вопрос: '{question}'. Для полной функциональности可能需要 настройка платежей."
 
-# --- ОБРАБОТЧИКИ КОМАНД ТЕЛЕГРАМА ---
+# --- отработка тг команд ---
 async def start_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     welcome_text = f"""
-🤖 *AI Бот с бесплатными моделями*
+ *AI Бот с бесплатными моделями*
 
-Используемая модель: *DeepSeek R1 (бесплатный)*
-
-💬 Просто напиши мне вопрос - и я помогу!
+Используем модель: *DeepSeek R1 (бесплатный)*
 
 *Команды:*
 /start - начать работу
@@ -81,16 +78,10 @@ async def start_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     help_text = """
-ℹ️ *Помощь по AI боту*
+ *Помощь по AI боту*
 Зачем тебе помощь для использования ии бота?
     """
     await update.message.reply_text(help_text, parse_mode='Markdown')
-
-async def models_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    models_text = "🤖 *Доступные бесплатные модели:*\n\n"
-    for model_id, model_desc in FREE_MODELS.items():
-        current = " ✅" if model_id == SELECTED_MODEL else ""
-        models_text += f"• *{model_id}* - {model_desc}{current}\n"
 
     await update.message.reply_text(models_text, parse_mode='Markdown')
 
@@ -105,9 +96,9 @@ async def error_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 # --- запуск бота ---
 async def main_async():
-    print("🤖 Запуск AI Telegram бота с бесплатными моделями...")
-    print(f"🧠 Используемая модель: {SELECTED_MODEL}")
-    print(f"📋 {FREE_MODELS[SELECTED_MODEL]}")
+    print(" Запуск AI Telegram бота с бесплатными моделями...")
+    print(f" Используемая модель: {SELECTED_MODEL}")
+    print(f" {FREE_MODELS[SELECTED_MODEL]}")
 
     try:
         application = Application.builder().token(TELEGRAM_BOT_TOKEN).build()
@@ -118,12 +109,12 @@ async def main_async():
         application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_message))
         application.add_error_handler(error_handler)
 
-        print("🔄 Инициализация бота...")
+        print("инициализация лол")
         await application.initialize()
         await application.start()
 
-        print("✅ Бот инициализирован")
-        print("📡 Запуск polling...")
+        print(" Бот инициализирован")
+        print(" Запуск polling...")
 
         await application.updater.start_polling(
             poll_interval=3.0,
@@ -131,21 +122,21 @@ async def main_async():
             drop_pending_updates=True
         )
 
-        print("🎉 Бот запущен и слушает сообщения!")
-        print("💬 Напишите боту в Telegram для теста")
+        print(" Бот запущен и слушает сообщения!")
+        print(" Напишите боту в Telegram для теста")
 
         while True:
             await asyncio.sleep(1)
 
     except Exception as e:
-        print(f"❌ Ошибка при запуске: {e}")
+        print(f" Ошибка при запуске: {e}")
     finally:
         try:
             if 'application' in locals():
                 await application.updater.stop()
                 await application.stop()
                 await application.shutdown()
-                print("🛑 Бот остановлен")
+                print("бот не ворк")
         except:
             pass
 
