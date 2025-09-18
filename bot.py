@@ -12,11 +12,11 @@ OPENROUTER_API_URL = "https://openrouter.ai/api/v1/chat/completions"
 
 # фри модели на OpenRouter
 FREE_MODELS = {
-    "gpt-3.5-turbo": "OpenAI GPT-3.5 Turbo (быстрый, бесплатный)",
-    "google/gemini-flash-1.5": "Google Gemini Flash 1.5 (качественный, бесплатный)",
-    "mistralai/mistral-7b-instruct": "Mistral 7B (бесплатный)",
-    "deepseek/deepseek-r1:free": "DeepSeek R1 (бесплатный)",  # Исправлено: правильное название
-    "meta-llama/llama-3.1-8b-instruct": "Llama 3.1 8B (бесплатный)"
+    "gpt-3.5-turbo": "OpenAI GPT-3.5 Turbo",
+    "google/gemini-flash-1.5": "Google Gemini Flash 1.5",
+    "mistralai/mistral-7b-instruct": "Mistral 7B",
+    "deepseek/deepseek-r1:free": "DeepSeek R1",
+    "meta-llama/llama-3.1-8b-instruct": "Llama 3.1 8B"
 }
 
 SELECTED_MODEL = "deepseek/deepseek-r1:free"
